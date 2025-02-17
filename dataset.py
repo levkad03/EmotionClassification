@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 
 class EmotionDataset(Dataset):
-    def __init__(self, data, vocab, tokenizer):
+    def __init__(self, data, vocab):
         self.data = data
         self.vocab = vocab
 

@@ -15,12 +15,11 @@ def yield_tokens(data, tokenizer):
         yield tokenizer(sentence)
 
 
-def collate_batch(batch, vocab):
+def collate_batch(batch):
     """collate function for DataLoader, which collects data into batch and pads it
 
     Args:
         batch (list): List of tuples (text, label), returned by Dataset
-        vocab (Vocab): torchtext token vocabulary with indices
 
     Returns:
         tuple:

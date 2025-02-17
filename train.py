@@ -1,13 +1,12 @@
 import pandas as pd
 import torch
+from nltk.tokenize import word_tokenize
 from torch.utils.data import DataLoader
-from torchtext.data.utils import get_tokenizer
-from torchtext.transforms import VocabTransform
-from torchtext.vocab import build_vocab_from_iterator
 
 from dataset import EmotionDataset
 from model import EmotionClassifier
 from utils import collate_batch, yield_tokens
+from vocabulary import Vocabulary
 
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -19,13 +18,11 @@ LOAD_MODEL = False
 DATASET_DIR = "data/combined_emotion.csv"
 
 df = pd.read_csv(DATASET_DIR)
-tokenizer = get_tokenizer("basic_english")
-vocab = build_vocab_from_iterator(
-    yield_tokens(df, tokenizer), specials=["<unk>", "<pad>"]
-)
-vocab.set_default_index(vocab["<unk>"])
+vocab = Vocabulary()
+for sentence in df["sentence"]:
+    vocab.add_sentence(sentence)
 
-dataset = EmotionDataset(df, vocab, tokenizer)
+dataset = EmotionDataset(df, vocab)
 
 dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=collate_batch)
 
