@@ -6,7 +6,6 @@ class EmotionDataset(Dataset):
     def __init__(self, data, vocab, tokenizer):
         self.data = data
         self.vocab = vocab
-        self.tokenizer = tokenizer
 
         self.labels = {label: idx for idx, label in enumerate(data["emotion"].unique())}
 
@@ -15,11 +14,7 @@ class EmotionDataset(Dataset):
 
     def __getitem__(self, idx):
         text = self.data.iloc[idx]["sentence"]
-        tokens = self.tokenizer(text)
-        indices = [
-            self.vocab[token] if token in self.vocab else self.vocab["<unk>"]
-            for token in tokens
-        ]
+        indices = self.vocab.encode(text)
 
         label = self.labels[self.data.iloc[idx]["emotion"]]
 

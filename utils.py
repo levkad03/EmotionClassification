@@ -29,12 +29,7 @@ def collate_batch(batch, vocab):
             - labels (Tensor): tensor with labels
     """
     texts, labels = zip(*batch)
-    lengths = torch.tensor([len(text) for text in texts])
-
-    texts = torch.nn.utils.rnn.pad_sequence(
-        texts, batch_first=True, padding_value=vocab["<pad>"]
-    )
-
-    labels = torch.stack(labels)
-
-    return texts, lengths, labels
+    texts = torch.nn.utils.rnn.pad_sequence(texts, batch_first=True, padding_value=0)
+    labels = torch.tensor(labels, dtype=torch.long)
+    lengths = torch.tensor([len(text) for text in texts], dtype=torch.long)
+    return texts, labels, lengths
