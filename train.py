@@ -5,6 +5,7 @@ from tqdm import tqdm
 from dataset import EmotionDataset
 from model import EmotionClassifier
 from utils import (
+    calculate_accuracy,
     create_dataloaders,
     load_checkpoint,
     save_checkpoint,
@@ -28,11 +29,12 @@ WEIGHT_DECAY = 0
 
 torch.manual_seed(RANDOM_SEED)
 
-print(f"Device: {DEVICE}")
-
 
 def train_fn(loader, model, optimizer, loss_fn, scaler, epoch):
     loop = tqdm(loader, desc=f"Epoch {epoch}")
+    total_loss = 0
+    correct = 0
+    total = 0
 
     for texts, labels, lengths in loop:
         texts = texts.to(DEVICE)
@@ -47,7 +49,16 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, epoch):
         scaler.step(optimizer)
         scaler.update()
 
+        predictions = torch.argmax(outputs, dim=1)
+        correct += (predictions == labels).sum().item()
+        total += labels.size(0)
+
+        total_loss += loss.item()
+
         loop.set_postfix(loss=loss.item())
+    train_loss = total_loss / len(loader)
+    train_accuracy = correct / total
+    return train_loss, train_accuracy
 
 
 def main():
@@ -86,7 +97,17 @@ def main():
         load_checkpoint(torch.load("emotion_classifier.pth.tar"), model)
 
     for epoch in range(NUM_EPOCHS):
-        train_fn(train_loader, model, optimizer, loss_fn, scaler, epoch)
+        train_loss, train_accuracy = train_fn(
+            train_loader, model, optimizer, loss_fn, scaler, epoch
+        )
+        test_accuracy = calculate_accuracy(test_loader, model, device=DEVICE)
+
+        print(
+            f"Epoch {epoch + 1}/{NUM_EPOCHS}, "
+            f"Train Loss: {train_loss:.4f}, "
+            f"Train Accuracy: {train_accuracy:.4f}, "
+            f"Test Accuracy: {test_accuracy:.4f}"
+        )
 
         checkpoint = {
             "state_dict": model.state_dict(),

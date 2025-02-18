@@ -61,3 +61,24 @@ def create_dataloaders(
     )
 
     return train_loader, test_loader
+
+
+def calculate_accuracy(loader, model, device):
+    correct = 0
+    total = 0
+
+    model.eval()
+
+    with torch.no_grad():
+        for texts, labels, lengths in loader:
+            texts = texts.to(device)
+            labels = labels.to(device)
+            outputs = model(texts, lengths)
+
+            predictions = torch.argmax(outputs, dim=1)
+
+            correct += (predictions == labels).sum().item()
+            total += labels.size(0)
+
+    model.train()
+    return correct / total
