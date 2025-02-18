@@ -1,18 +1,15 @@
 import torch
+from torch.utils.data import DataLoader, random_split
 
 
-def yield_tokens(data, tokenizer):
-    """Generator, which goes through data and applies tokenizer to each sentence
+def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    print("=> Saving checkpoint")
+    torch.save(state, filename)
 
-    Args:
-        data (iterable): list or other iterable structure with text
-        tokenizer (Callable): tokenization function
 
-    Yields:
-        iterable: token sequence for each sentence
-    """
-    for sentence in data:
-        yield tokenizer(sentence)
+def load_checkpoint(checkpoint, model):
+    print("=> Loading checkpoint")
+    model.load_state_dict(checkpoint["state_dict"])
 
 
 def collate_batch(batch):
@@ -32,3 +29,35 @@ def collate_batch(batch):
     labels = torch.tensor(labels, dtype=torch.long)
     lengths = torch.tensor([len(text) for text in texts], dtype=torch.long)
     return texts, labels, lengths
+
+
+def create_dataloaders(
+    dataset, batch_size, num_workers, pin_memory, train_split, random_seed=123
+):
+    torch.manual_seed(random_seed)
+
+    total_size = len(dataset)
+    train_size = int(train_split * total_size)
+    test_size = total_size - train_size
+
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_batch,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
+
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        collate_fn=collate_batch,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+    )
+
+    return train_loader, test_loader

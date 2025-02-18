@@ -3,12 +3,12 @@ from collections import defaultdict
 import nltk
 from nltk.tokenize import word_tokenize
 
-nltk.download("punkt")
+nltk.download("punkt", quiet=True)
 
 
 class Vocabulary:
     def __init__(self):
-        self.word2idx = defaultdict(lambda: self.word2idx["<unk>"])
+        self.word2idx = {}
         self.word2idx["<pad>"] = 0
         self.word2idx["<unk>"] = 1
         self.idx2word = {0: "<pad>", 1: "<unk>"}
@@ -28,4 +28,7 @@ class Vocabulary:
         return len(self.word2idx)
 
     def encode(self, sentence):
-        return [self.word2idx[word] for word in word_tokenize(sentence)]
+        return [
+            self.word2idx.get(word, self.word2idx["<unk>"])
+            for word in word_tokenize(sentence)
+        ]
