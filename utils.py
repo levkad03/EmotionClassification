@@ -3,11 +3,23 @@ from torch.utils.data import DataLoader, random_split
 
 
 def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    """Saves model checkpoint
+
+    Args:
+        state : State of the model
+        filename (str, optional): Name of the file. Defaults to "my_checkpoint.pth.tar".
+    """
     print("=> Saving checkpoint")
     torch.save(state, filename)
 
 
 def load_checkpoint(checkpoint, model):
+    """Load model checkpoint from the file
+
+    Args:
+        checkpoint: model checkpoint
+        model: model which checkpoint will be loaded
+    """
     print("=> Loading checkpoint")
     model.load_state_dict(checkpoint["state_dict"])
 
@@ -34,6 +46,19 @@ def collate_batch(batch):
 def create_dataloaders(
     dataset, batch_size, num_workers, pin_memory, train_split, random_seed=123
 ):
+    """Create train and test dataloaders from dataset
+
+    Args:
+        dataset : dataset which will be loaded
+        batch_size (int): batch size
+        num_workers (int): number of workers for multiprocessing
+        pin_memory (bool): pin memory
+        train_split (float): split ration
+        random_seed (int, optional): random seed. Defaults to 123.
+
+    Returns:
+        tuple: train and test dataloaders
+    """
     torch.manual_seed(random_seed)
 
     total_size = len(dataset)
