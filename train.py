@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from dataset import EmotionDataset
@@ -30,13 +31,13 @@ WEIGHT_DECAY = 0
 torch.manual_seed(RANDOM_SEED)
 
 
-def train_fn(loader, model, optimizer, loss_fn, scaler, epoch):
+def train_fn(loader, model, optimizer, loss_fn, scaler, epoch, writer):
     loop = tqdm(loader, desc=f"Epoch {epoch}")
     total_loss = 0
     correct = 0
     total = 0
 
-    for texts, labels, lengths in loop:
+    for batch_idx, (texts, labels, lengths) in enumerate(loop):
         texts = texts.to(DEVICE)
         labels = labels.to(DEVICE)
 
@@ -56,8 +57,17 @@ def train_fn(loader, model, optimizer, loss_fn, scaler, epoch):
         total_loss += loss.item()
 
         loop.set_postfix(loss=loss.item())
+
+        writer.add_scalar(
+            "Train/Batch_Loss", loss.item(), epoch * len(loader) + batch_idx
+        )
+
     train_loss = total_loss / len(loader)
     train_accuracy = correct / total
+
+    writer.add_scalar("Train/Loss", train_loss, epoch)
+    writer.add_scalar("Train/Accuracy", train_accuracy, epoch)
+
     return train_loss, train_accuracy
 
 
@@ -96,11 +106,19 @@ def main():
     if LOAD_MODEL:
         load_checkpoint(torch.load("emotion_classifier.pth.tar"), model)
 
+    writer = SummaryWriter("runs/emotion_classifier")
+
+    dummy_texts = torch.randint(0, len(vocab), (1, 10)).to(DEVICE)
+    dummy_lengths = torch.tensor([10])
+    writer.add_graph(model, (dummy_texts, dummy_lengths))
+
     for epoch in range(NUM_EPOCHS):
         train_loss, train_accuracy = train_fn(
-            train_loader, model, optimizer, loss_fn, scaler, epoch
+            train_loader, model, optimizer, loss_fn, scaler, epoch, writer
         )
         test_accuracy = calculate_accuracy(test_loader, model, device=DEVICE)
+
+        writer.add_scalar("Test/Accuracy", test_accuracy, epoch)
 
         print(
             f"Epoch {epoch + 1}/{NUM_EPOCHS}, "

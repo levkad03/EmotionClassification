@@ -89,6 +89,16 @@ def create_dataloaders(
 
 
 def calculate_accuracy(loader, model, device):
+    """Calculate accuracy of the model
+
+    Args:
+        loader (DataLoader): dataloader of the dataset
+        model (Module): Neural network
+        device (string): device which will be used
+
+    Returns:
+        float: accuracy of the model
+    """
     correct = 0
     total = 0
 
