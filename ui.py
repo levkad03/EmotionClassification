@@ -1,11 +1,15 @@
 import pickle
 
+import matplotlib.pyplot as plt
+import plotly.express as px
 import streamlit as st
 import torch
 
 from model import EmotionClassifier
 from utils import load_checkpoint
 from vocabulary import Vocabulary
+
+st.set_page_config(page_title="Emotion Classification", page_icon=":smiley:")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 CHECKPOINT_PATH = "emotion_classifier.pth.tar"
@@ -50,6 +54,18 @@ if user_input:
     with torch.no_grad():
         output = model(inputs, [len(tokens)])
         prediction = torch.argmax(output, dim=1).item()
+        probabilities = torch.softmax(output, dim=1).squeeze().cpu().numpy()
 
     emotion = index_to_emotion.get(prediction, "Unknown")
     st.write(f"Predicted emotion: **{emotion}**")
+
+    emotions = list(index_to_emotion.values())
+    fig = px.bar(
+        x=emotions,
+        y=probabilities,
+        labels={"x": "Emotion", "y": "Probability"},
+        title="Emotion Prediction Probabilities",
+        color=emotions,
+    )
+
+    st.plotly_chart(fig)
