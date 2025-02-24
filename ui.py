@@ -12,7 +12,7 @@ from vocabulary import Vocabulary
 st.set_page_config(page_title="Emotion Classification", page_icon=":smiley:")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-CHECKPOINT_PATH = "emotion_classifier.pth.tar"
+CHECKPOINT_PATH = "emotion_classifier_biderectional.pth.tar"
 EMBEDDING_DIM = 200
 HIDDEN_DIM = 256
 PAD_IDX = 0

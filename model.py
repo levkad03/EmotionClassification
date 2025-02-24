@@ -22,9 +22,12 @@ class EmotionClassifier(nn.Module):
             num_layers=num_layers,
             dropout=dropout if num_layers > 1 else 0,
             batch_first=True,
-        )
+            bidirectional=True,
+        )  # bidirectional LSTM to capture both directions
 
-        self.fc = nn.Linear(hidden_dim, output_dim)
+        self.dropout = nn.Dropout(dropout)
+
+        self.fc = nn.Linear(hidden_dim * 2, output_dim)
 
     def forward(self, text, lengths):
         embedded = self.embedding(text)
@@ -35,7 +38,10 @@ class EmotionClassifier(nn.Module):
 
         packed_output, (hidden, cell) = self.lstm(packed_embedded)
 
-        hidden = hidden[-1]
+        # Для bidirectional LSTM нужно объединить два направления
+        hidden = torch.cat(
+            (hidden[-2], hidden[-1]), dim=1
+        )  # (batch_size, hidden_dim * 2)
 
-        output = self.fc(hidden)
+        output = self.fc(self.dropout(hidden))
         return output

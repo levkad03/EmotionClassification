@@ -21,6 +21,7 @@ NUM_WORKERS = 2
 PIN_MEMORY = True
 LOAD_MODEL = False
 DATASET_DIR = "data/combined_emotion.csv"
+CHECKPOINT_PATH = "emotion_classifier_biderectional.pth.tar"
 EMBEDDING_DIM = 200
 HIDDEN_DIM = 256
 PAD_IDX = 0
@@ -104,9 +105,9 @@ def main():
     scaler = torch.amp.GradScaler(DEVICE)
 
     if LOAD_MODEL:
-        load_checkpoint(torch.load("emotion_classifier.pth.tar"), model)
+        load_checkpoint(torch.load(CHECKPOINT_PATH), model)
 
-    writer = SummaryWriter("runs/emotion_classifier")
+    writer = SummaryWriter("runs/emotion_classifier_bidirectional")
 
     dummy_texts = torch.randint(0, len(vocab), (1, 10)).to(DEVICE)
     dummy_lengths = torch.tensor([10])
@@ -131,7 +132,7 @@ def main():
             "state_dict": model.state_dict(),
             "optimizer": optimizer.state_dict(),
         }
-        save_checkpoint(checkpoint, "emotion_classifier.pth.tar")
+        save_checkpoint(checkpoint, CHECKPOINT_PATH)
 
 
 if __name__ == "__main__":
