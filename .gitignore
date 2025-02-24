@@ -174,5 +174,4 @@ cython_debug/
 .pypirc
 
 data
-emotion_classifier.pth.tar
-emotion_classifier_biderectional.pth.tar
+models
