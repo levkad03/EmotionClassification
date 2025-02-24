@@ -3,6 +3,23 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
+from config import (
+    BATCH_SIZE,
+    CHECKPOINT_PATH,
+    DATASET_DIR,
+    DEVICE,
+    EMBEDDING_DIM,
+    HIDDEN_DIM,
+    LEARNING_RATE,
+    LOAD_MODEL,
+    NUM_EPOCHS,
+    NUM_LAYERS,
+    NUM_WORKERS,
+    PAD_IDX,
+    PIN_MEMORY,
+    RANDOM_SEED,
+    WEIGHT_DECAY,
+)
 from dataset import EmotionDataset
 from model import EmotionClassifier
 from utils import (
@@ -12,22 +29,6 @@ from utils import (
     save_checkpoint,
 )
 from vocabulary import Vocabulary
-
-LEARNING_RATE = 1e-4
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 64
-NUM_EPOCHS = 100
-NUM_WORKERS = 2
-PIN_MEMORY = True
-LOAD_MODEL = False
-DATASET_DIR = "data/combined_emotion.csv"
-CHECKPOINT_PATH = "emotion_classifier_biderectional.pth.tar"
-EMBEDDING_DIM = 200
-HIDDEN_DIM = 256
-PAD_IDX = 0
-NUM_LAYERS = 2
-RANDOM_SEED = 123
-WEIGHT_DECAY = 0
 
 torch.manual_seed(RANDOM_SEED)
 
