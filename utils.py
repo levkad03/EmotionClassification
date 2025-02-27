@@ -1,5 +1,6 @@
+import numpy as np
 import torch
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, WeightedRandomSampler, random_split
 
 
 def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
@@ -67,13 +68,30 @@ def create_dataloaders(
 
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
+    # Get labels from the dataset
+    train_targets = [dataset.data.iloc[i]["emotion"] for i in train_dataset.indices]
+    # Count labels frequency
+    class_sample_count = np.bincount([dataset.labels[t] for t in train_targets])
+
+    # Get the weight for each class (less frequent -> bigger weight)
+    weight = 1.0 / class_sample_count
+
+    # Assign weights to labels
+    samples_weight = np.array([weight[dataset.labels[t]] for t in train_targets])
+    samples_weight = torch.from_numpy(samples_weight).double()
+
+    # Create sampler
+    sampler = WeightedRandomSampler(
+        weights=samples_weight, num_samples=len(train_dataset), replacement=True
+    )
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
-        shuffle=True,
         collate_fn=collate_batch,
         num_workers=num_workers,
         pin_memory=pin_memory,
+        sampler=sampler,
     )
 
     test_loader = DataLoader(

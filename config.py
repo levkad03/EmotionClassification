@@ -21,7 +21,7 @@ WEIGHT_DECAY = 0
 
 # File paths
 DATASET_DIR = "data/combined_emotion.csv"
-CHECKPOINT_PATH = "models/emotion_classifier_biderectional.pth.tar"
+CHECKPOINT_PATH = "models/emotion_classifier_biderectional_weighted_sampler.pth.tar"
 VOCAB_PATH = "vocab.pkl"
 
 # Emotion labels

@@ -34,7 +34,7 @@ torch.manual_seed(RANDOM_SEED)
 
 
 def train_fn(loader, model, optimizer, loss_fn, scaler, epoch, writer):
-    loop = tqdm(loader, desc=f"Epoch {epoch}")
+    loop = tqdm(loader, desc=f"Epoch {epoch + 1}")
     total_loss = 0
     correct = 0
     total = 0
@@ -108,7 +108,7 @@ def main():
     if LOAD_MODEL:
         load_checkpoint(torch.load(CHECKPOINT_PATH), model)
 
-    writer = SummaryWriter("runs/emotion_classifier_bidirectional")
+    writer = SummaryWriter("runs/emotion_classifier_bidirectional_weighted_sampler")
 
     dummy_texts = torch.randint(0, len(vocab), (1, 10)).to(DEVICE)
     dummy_lengths = torch.tensor([10])
